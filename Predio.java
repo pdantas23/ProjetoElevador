@@ -4,7 +4,6 @@ public class Predio extends EntidadeSimulavel {
     private CentralDeControle centralDeControle;
     private ListaAndares listaAndares;
     private ListaChamadas listaChamadasGlobal;
-    private InterfaceGrafica interfaceGrafica;
 
     public Predio(int quantidadeAndares, int quantidadeElevadores) {
         this.quantidadeAndares = quantidadeAndares;
@@ -18,6 +17,7 @@ public class Predio extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
+        exbirHoraDoDia(minutoSimulado);
         atualizarAndares(minutoSimulado);
         centralDeControle.atualizar(minutoSimulado);
     }
@@ -48,6 +48,11 @@ public class Predio extends EntidadeSimulavel {
 
     }
 
+    private void exbirHoraDoDia(int minutoSimulado){
+        int horaSimulada = minutoSimulado / 60;
+        System.out.println("Hora do dia: " + horaSimulada);
+    }
+
     //Getters
     public ListaChamadas getListaChamadasGlobal() {
         return listaChamadasGlobal;
@@ -65,7 +70,4 @@ public class Predio extends EntidadeSimulavel {
         return listaAndares;
     }
 
-    public void setInterfaceGrafica(InterfaceGrafica interfaceGrafica) {
-        this.interfaceGrafica = interfaceGrafica;
-    }
 }

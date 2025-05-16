@@ -28,7 +28,7 @@ public class InterfaceGrafica implements Simulavel {
     private void initUI(Stage stage) {
         root.setCenter(interfacePredio);
 
-        Scene scene = new Scene(root, 400, 800);
+        Scene scene = new Scene(root, 400, 600);
         stage.setTitle("Simulação de Elevador");
         stage.setScene(scene);
         stage.show();

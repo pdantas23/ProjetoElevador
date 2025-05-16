@@ -39,7 +39,9 @@ public class Elevador extends EntidadeSimulavel {
 
     //Simulação do elevador
     public void simular() {
-        System.out.println("Elevador:  " + id + " | Andar atual: " + andarAtual.getValor().getNumero());
+        System.out.println("--------------------------------------------");
+        System.out.println("Elevador:  " + id);
+        System.out.println("Andar atual:  " + andarAtual.getValor().getNumero());
         chamadasExclusivas.exibirChamadas();
 
         desembarcarPessoas(andarAtual.getValor());
@@ -54,10 +56,10 @@ public class Elevador extends EntidadeSimulavel {
         } else {
             System.out.println("Elevador sem destino.");
         }
+        System.out.println("-----------------------------");
         System.out.println("Passageiros no elevador " + getId() + ":");
         getListaPassageiros().mostrarPassageiros();
         System.out.println("Gasto de energia total: " + energiaGasta);
-        System.out.println("---------------------------------");
     }
 
     //Inicializa o elevador
@@ -93,6 +95,7 @@ public class Elevador extends EntidadeSimulavel {
         }else{
             energiaGasta += 1;
         }
+        System.out.println("Novo andar atual: " + andarAtual.getValor().getNumero());
     }
 
     //Encontra o destino mais proximo
@@ -104,13 +107,13 @@ public class Elevador extends EntidadeSimulavel {
             destino = procurarDestinoChamadasNaDirecao(subindo);
         }
 
-        // Se não há mais nada na direção atual, inverte a direção
+        // Se não há chamdas na direção atual, inverte a direção
         if (destino == -1) {
-            subindo = !subindo;
+            boolean descendo = !subindo;
 
-            destino = procurarDestinoPassageirosNaDirecao(subindo);
+            destino = procurarDestinoPassageirosNaDirecao(descendo);
             if (destino == -1) {
-                destino = procurarDestinoChamadasNaDirecao(subindo);
+                destino = procurarDestinoChamadasNaDirecao(descendo);
             }
         }
         return destino;

@@ -14,6 +14,10 @@ public class NodeChamadas {
         return andarOrigem;
     }
 
+    public int getAndarDestino() {
+        return andarDestino;
+    }
+
     public NodeChamadas getProximo() {
         return proximo;
     }

@@ -15,20 +15,36 @@ public class Andar extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
-        gerarPessoaPeriodicamente();
+        gerarPessoaPeriodicamente(minutoSimulado);
         verificarChamadaNecessaria();
         incrementarTempoFila();
+        System.out.println("Fila do andar: " + numero);
+        pessoasAguardando.exibirFila();
     }
 
     //Gera pessoas periodicamente no andar
-    public void gerarPessoaPeriodicamente() {
+    public void gerarPessoaPeriodicamente(int minutoSimulado) {
         Random random = new Random();
-        int chanceDeGerarPessoa = random.nextInt(10);
-        if (chanceDeGerarPessoa < 4) {
-            if (pessoasAguardando.getTamanho() < 10) {
-                Pessoa pessoa = Pessoa.gerarPessoaAleatoria(this);
-                pessoasAguardando.adicionarPessoa(pessoa);
-            }
+
+        int horaSimulada = minutoSimulado / 60;
+        double chanceGerar;
+
+        if (horaSimulada >= 9 && horaSimulada < 17) {
+            // Horário comercial
+            chanceGerar = 0.50;
+        } else if ((horaSimulada >= 6 && horaSimulada < 9) || (horaSimulada >= 17 && horaSimulada < 20)) {
+            // Início da manhã ou fim da tarde/começo da noite
+            chanceGerar = 0.30;
+        } else {
+            // Noite e madrugada
+            chanceGerar = 0.10;
+        }
+
+        double sorteio = random.nextDouble(); // gera valor entre 0.0 e 1.0
+
+        if (sorteio < chanceGerar && pessoasAguardando.getTamanho() < 10) {
+            Pessoa pessoa = Pessoa.gerarPessoaAleatoria(this);
+            pessoasAguardando.adicionarPessoa(pessoa);
         }
     }
 

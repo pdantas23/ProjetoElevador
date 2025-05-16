@@ -40,12 +40,12 @@ public class ListaChamadas {
                 } else {
                     anterior.setProximo(atual.getProximo());
                 }
+                tamanho--;
                 return;
             }
             anterior = atual;
             atual = atual.getProximo();
         }
-        tamanho--;
     }
 
     //Exibe a lista de chamadas
@@ -58,16 +58,26 @@ public class ListaChamadas {
         NodeChamadas atual = primeiro;
         System.out.println("Chamadas Ativas:");
         while (atual != null) {
-            Andar andar = atual.getAndarOrigem();  // Aqui você acessa o andar da chamada
-            System.out.println("Andar: " + andar.getNumero() + " | Botão pressionado: " + andar.getPainelExterno().isBotaoPressionado());
+            Andar andar = atual.getAndarOrigem();
+
+            System.out.println("Andar: " + andar.getNumero());
             atual = atual.getProximo();
         }
     }
 
-    //Getters
-    public boolean isEmpty() {
-        return tamanho == 0;
+    public boolean contemChamada(int andar) {
+        NodeChamadas atual = primeiro;
+        while (atual != null) {
+            if (atual.getAndarOrigem().getNumero() == andar) {
+                return true;
+            }
+            atual = atual.getProximo();
+        }
+        return false;
     }
+
+    //Getters
+    public boolean isEmpty() { return tamanho == 0; }
 
     public NodeChamadas getPrimeiro() {
         return primeiro;

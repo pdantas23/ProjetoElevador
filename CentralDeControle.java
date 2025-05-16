@@ -55,7 +55,7 @@ public class CentralDeControle extends EntidadeSimulavel {
             atual = atual.getProximo();
         }
 
-        if (totalPessoas > 150) {
+        if (totalPessoas > 20) {
             horarioPico = true;
         } else {
             horarioPico = false;
@@ -76,62 +76,64 @@ public class CentralDeControle extends EntidadeSimulavel {
             while (elevadorAtual != null) {
                 Elevador elevador = elevadorAtual.getElevador();
 
-                // Verifica se o elevador está cheio ou se sua lista de chamadas está no limite
-                if (elevador.getEmbarcados() >= elevador.getCapacidadeMaxima() ||
-                        elevador.getListaChamadas().getTamanho() >= 4) {
+                // Ignora elevadores cheios ou com muitas chamadas
+                if (elevador.getEmbarcados() >= elevador.getCapacidadeMaxima() || elevador.getListaChamadas().getTamanho() >= 4) {
                     elevadorAtual = elevadorAtual.getProximo();
                     continue;
                 }
 
                 int andarElevador = elevador.getAndarAtual().getValor().getNumero();
                 int andarChamadaNum = andarChamada.getNumero();
-
-                // Calcula distância entre elevador e chamada
                 int distancia = Math.abs(andarElevador - andarChamadaNum);
 
                 boolean mesmaDirecao = (elevador.isSubindo() && andarChamadaNum > andarElevador) || (!elevador.isSubindo() && andarChamadaNum < andarElevador);
 
                 boolean elevadorParado = elevador.isParado();
-                boolean temPassageirosEmbarcados = elevador.getEmbarcados() > 0;
+                boolean temPassageiros = elevador.getEmbarcados() > 0;
 
-                //Sistema de pontos pra determinar o elevador escolhido
-                int pontuacao = 0;
-                pontuacao += temPassageirosEmbarcados ? 0 : 50;
-                pontuacao += elevadorParado ? 0 : 20;
+                // Pontuação baseada em critérios
+                int pontuacao = distancia;
+                pontuacao += temPassageiros ? 10 : 0;
+                pontuacao += elevadorParado ? -10 : 20;
                 pontuacao += mesmaDirecao ? 0 : 30;
-                pontuacao += distancia;
 
-                if (melhorElevadorNode == null || pontuacao < menorPontuacao) {
+                if (pontuacao < menorPontuacao) {
                     menorPontuacao = pontuacao;
                     melhorElevadorNode = elevadorAtual;
                 }
+
                 elevadorAtual = elevadorAtual.getProximo();
             }
 
+            // Atribui a chamada ao melhor elevador encontrado
             if (melhorElevadorNode != null) {
                 Elevador escolhido = melhorElevadorNode.getElevador();
-                // Garante que o elevador ainda tenha espaço nas chamadas
-                if (escolhido.getListaChamadas().getTamanho() < 4) {
+
+                // Verifica se a chamada já não está presente
+                if (!escolhido.getListaChamadas().contemChamada(andarChamada.getNumero())) {
                     escolhido.getListaChamadas().adicionarChamada(andarChamada, andarChamada.getNumero());
                     chamadasGlobais.removerChamada(andarChamada.getNumero());
+                    chamadaAtual = chamadasGlobais.getPrimeiro(); // Reinicia, pois a lista mudou
+                    continue;
                 }
             }
+
             chamadaAtual = chamadaAtual.getProximo();
         }
 
-        // Verifica se ainda há chamadas não atribuídas e força distribuição para elevadores parados com espaço
+        // Segunda fase: ainda há chamadas não atribuídas
         chamadaAtual = chamadasGlobais.getPrimeiro();
         while (chamadaAtual != null) {
             Andar andarChamada = chamadaAtual.getAndarOrigem();
-
-            // Procura elevador parado com menos de 4 chamadas
-            NodeElevador elevadorNode = listaElevadores.getInicio();
             boolean atribuida = false;
 
+            // Prioriza elevadores parados
+            NodeElevador elevadorNode = listaElevadores.getInicio();
             while (elevadorNode != null) {
                 Elevador elevador = elevadorNode.getElevador();
 
-                if (elevador.isParado() && elevador.getListaChamadas().getTamanho() < 4 && elevador.getEmbarcados() < elevador.getCapacidadeMaxima()) {
+                if (elevador.isParado() && elevador.getListaChamadas().getTamanho() < 4 && elevador.getEmbarcados() < elevador.getCapacidadeMaxima() && !elevador.getListaChamadas().contemChamada(andarChamada.getNumero())) {
+
                     elevador.getListaChamadas().adicionarChamada(andarChamada, andarChamada.getNumero());
                     chamadasGlobais.removerChamada(andarChamada.getNumero());
                     atribuida = true;
@@ -141,14 +143,13 @@ public class CentralDeControle extends EntidadeSimulavel {
                 elevadorNode = elevadorNode.getProximo();
             }
 
-            // Se não conseguiu atribuir a nenhum parado, tenta atribuir a qualquer um com espaço
+            // Se nenhum parado pôde atender, tenta qualquer disponível
             if (!atribuida) {
                 elevadorNode = listaElevadores.getInicio();
                 while (elevadorNode != null) {
                     Elevador elevador = elevadorNode.getElevador();
 
-                    if (elevador.getListaChamadas().getTamanho() < 4 &&
-                            elevador.getEmbarcados() < elevador.getCapacidadeMaxima()) {
+                    if (elevador.getListaChamadas().getTamanho() < 4 && elevador.getEmbarcados() < elevador.getCapacidadeMaxima() && !elevador.getListaChamadas().contemChamada(andarChamada.getNumero())) {
 
                         elevador.getListaChamadas().adicionarChamada(andarChamada, andarChamada.getNumero());
                         chamadasGlobais.removerChamada(andarChamada.getNumero());
@@ -158,6 +159,7 @@ public class CentralDeControle extends EntidadeSimulavel {
                     elevadorNode = elevadorNode.getProximo();
                 }
             }
+
             chamadaAtual = chamadaAtual.getProximo();
         }
     }

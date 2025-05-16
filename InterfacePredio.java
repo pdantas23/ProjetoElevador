@@ -1,6 +1,7 @@
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 
 public class InterfacePredio extends Pane implements Simulavel {
     private static final int MARGEM_SUPERIOR = 10;
@@ -9,13 +10,11 @@ public class InterfacePredio extends Pane implements Simulavel {
     private static final int ESPACO_MINIMO_POR_ELEVADOR = 50;
 
     private final Predio predio;
-    private final InterfaceElevador interfaceElevador;
     private final Canvas canvas;
 
     public InterfacePredio(Predio predio) {
         this.predio = predio;
-        this.interfaceElevador = new InterfaceElevador(predio);
-        this.canvas = new Canvas(400, 800);
+        this.canvas = new Canvas(400, 600);
         this.getChildren().add(canvas);
         desenhar();
     }
@@ -57,7 +56,7 @@ public class InterfacePredio extends Pane implements Simulavel {
         desenharPessoasNosAndares(g2, predio.getListaAndares().getInicio(), alturaAndar, alturaPainel, larguraUtil, predioX);
 
         // Desenhar elevadores
-        interfaceElevador.draw();
+        desenharElevadores(g2);
     }
 
     private void desenharBaias(GraphicsContext g2, int predioX, int predioY, int alturaUtil, int qtdElevadores, int larguraBaia, int larguraElevadoresTotal) {
@@ -73,7 +72,10 @@ public class InterfacePredio extends Pane implements Simulavel {
         int alturaUtilAndares = alturaPainel - MARGEM_SUPERIOR - MARGEM_INFERIOR;
         int alturaAndar = alturaUtilAndares / numeroAndares;
 
+        int linhaInferior = MARGEM_SUPERIOR + (alturaAndar * numeroAndares);
+
         int y = MARGEM_SUPERIOR;
+
         for (int i = 0; i <= numeroAndares; i++) {
             g2.strokeLine(predioX, y, predioX + larguraUtil, y);
             y += alturaAndar;
@@ -120,8 +122,40 @@ public class InterfacePredio extends Pane implements Simulavel {
         gc.strokeLine(centro, y + cabeca + h / 3, centro + w / 3, y + h);
     }
 
+    private void desenharElevadores(GraphicsContext gc) {
+        int qtdElevadores = predio.getCentralDeControle().getElevadores().getTamanho();
+        int larguraUtil = (int) canvas.getWidth() - 2 * MARGEM_LATERAL;
+        int alturaUtil = (int) canvas.getHeight() - MARGEM_SUPERIOR - MARGEM_INFERIOR;
+        int qtdAndares = predio.getQuantidadeAndares();
+        int alturaAndar = alturaUtil / qtdAndares;
+        int larguraPorElevador = Math.max(ESPACO_MINIMO_POR_ELEVADOR, larguraUtil / (qtdElevadores + 2));
+        int predioX = MARGEM_LATERAL;
+
+        NodeElevador nodeElevador = predio.getCentralDeControle().getElevadores().getInicio();
+
+        int posElevador = 0;
+
+        while (nodeElevador != null) {
+            Elevador elevador = nodeElevador.getElevador();
+            int andar = elevador.getAndarAtual().getValor().getNumero();
+
+
+            int elevadorY = MARGEM_SUPERIOR + (qtdAndares - andar) * alturaAndar + 10;
+            int elevadorX = predioX + larguraPorElevador * posElevador + (larguraPorElevador - 30) / 2;
+
+            elevador.setPosicaoY(elevadorY);
+
+            gc.setFill(Color.LIGHTGRAY);
+            gc.fillRect(elevadorX, elevadorY, 30, 40);
+            gc.setStroke(Color.BLACK);
+            gc.strokeRect(elevadorX, elevadorY, 30, 40);
+
+            posElevador++;
+            nodeElevador = nodeElevador.getProximo();
+        }
+    }
+
     @Override
     public void simular() {
-        // pode ser usado no futuro se precisar
     }
 }
